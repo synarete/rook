@@ -140,35 +140,41 @@ type SafeToDestroyStatus struct {
 	SafeToDestroy []int `json:"safe_to_destroy"`
 }
 
+// OsdTreeNode represents node entry in OsdTree
+type OsdTreeNode struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	TypeID      int    `json:"type_id"`
+	Children    []int  `json:"children,omitempty"`
+	PoolWeights struct {
+	} `json:"pool_weights,omitempty"`
+	CrushWeight     float64 `json:"crush_weight,omitempty"`
+	Depth           int     `json:"depth,omitempty"`
+	Exists          int     `json:"exists,omitempty"`
+	Status          string  `json:"status,omitempty"`
+	Reweight        float64 `json:"reweight,omitempty"`
+	PrimaryAffinity float64 `json:"primary_affinity,omitempty"`
+}
+
+// OsdTreeStray represents stray entry in OsdTree
+type OsdTreeStray struct {
+	ID              int     `json:"id"`
+	Name            string  `json:"name"`
+	Type            string  `json:"type"`
+	TypeID          int     `json:"type_id"`
+	CrushWeight     float64 `json:"crush_weight"`
+	Depth           int     `json:"depth"`
+	Exists          int     `json:"exists"`
+	Status          string  `json:"status"`
+	Reweight        float64 `json:"reweight"`
+	PrimaryAffinity float64 `json:"primary_affinity"`
+}
+
 // OsdTree represents the CRUSH hierarchy
 type OsdTree struct {
-	Nodes []struct {
-		ID          int    `json:"id"`
-		Name        string `json:"name"`
-		Type        string `json:"type"`
-		TypeID      int    `json:"type_id"`
-		Children    []int  `json:"children,omitempty"`
-		PoolWeights struct {
-		} `json:"pool_weights,omitempty"`
-		CrushWeight     float64 `json:"crush_weight,omitempty"`
-		Depth           int     `json:"depth,omitempty"`
-		Exists          int     `json:"exists,omitempty"`
-		Status          string  `json:"status,omitempty"`
-		Reweight        float64 `json:"reweight,omitempty"`
-		PrimaryAffinity float64 `json:"primary_affinity,omitempty"`
-	} `json:"nodes"`
-	Stray []struct {
-		ID              int     `json:"id"`
-		Name            string  `json:"name"`
-		Type            string  `json:"type"`
-		TypeID          int     `json:"type_id"`
-		CrushWeight     float64 `json:"crush_weight"`
-		Depth           int     `json:"depth"`
-		Exists          int     `json:"exists"`
-		Status          string  `json:"status"`
-		Reweight        float64 `json:"reweight"`
-		PrimaryAffinity float64 `json:"primary_affinity"`
-	} `json:"stray"`
+	Nodes []OsdTreeNode  `json:"nodes"`
+	Stray []OsdTreeStray `json:"stray"`
 }
 
 // OsdList returns the list of OSD by their IDs
