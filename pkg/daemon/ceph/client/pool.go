@@ -535,3 +535,38 @@ func GetPoolStatistics(context *clusterd.Context, clusterInfo *ClusterInfo, name
 
 	return &poolStats, nil
 }
+
+func calcChildToParentMap(context *clusterd.Context, clusterInfo *ClusterInfo) (map[int]OsdTreeNode, error) {
+	osdTree, err := HostTree(context, clusterInfo)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get host tree")
+	}
+	childToParentMap := make(map[int]OsdTreeNode)
+	for _, node := range osdTree.Nodes {
+		for _, child := range node.Children {
+			childToParentMap[child] = node
+		}
+	}
+	return childToParentMap, nil
+}
+
+func addBucketToCrushMap(context *clusterd.Context, clusterInfo *ClusterInfo, bucketName, bucketType string) (string, error) {
+	args := []string{"osd", "crush", "add-bucket", bucketName, bucketType}
+	buf, err := NewCephCommand(context, clusterInfo, args).Run()
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to add-bucket '%s' type=%s: %s", bucketName, bucketType, string(buf))
+	}
+	return string(buf), nil
+}
+
+func moveBucketLocationInCrushMap(context *clusterd.Context, clusterInfo *ClusterInfo, bucketName string, pathToRoot []OsdTreeNode) error {
+	args := []string{"osd", "crush", "move", bucketName}
+	for _, osdTreeNode := range pathToRoot {
+		args = append(args, fmt.Sprintf("%s=%s", osdTreeNode.Type, osdTreeNode.Name))
+	}
+	_, err := NewCephCommand(context, clusterInfo, args).Run()
+	if err != nil {
+		return errors.Wrapf(err, "failed to move bucket '%s'", bucketName)
+	}
+	return nil
+}
